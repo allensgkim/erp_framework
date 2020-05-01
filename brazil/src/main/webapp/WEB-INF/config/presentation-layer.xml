@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+	<context:component-scan base-package="com.brerp.view"></context:component-scan>
+	<mvc:annotation-driven></mvc:annotation-driven>
+		
+	<!-- fileUpload 할때 사용하며, id명 반드시 multipartResolver로 정의할 것 Resolver로 끝나는 클래스들은 대부분 아이디가 정해져 있음. -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="100000"></property>
+	</bean>
+
+	<bean id="exceptionResolver" class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="exceptionMappings">
+			<props>
+				<prop key="java.lang.ArithmeticException">
+					common/arithmeticError.jsp
+				</prop>
+				<prop key="java.lang.NullPointerException">
+					common/nullPointerError.jsp
+				</prop>
+				<prop key="javax.servlet.ServletException">
+					common/error.jsp
+				</prop>
+			</props>
+		</property>
+		<property name="defaultErrorView" value="common/error.jsp"></property>
+	</bean>
+	
+	<!-- 다국어설정 반드시 id는 messageSource로 한다. 내부정의 -->
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>message.messageSource</value>
+			</list>
+		</property>
+	</bean>
+	<!-- LocaleResolver 등록 -->
+	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver"></bean>
+	<!-- LocaleChangeInterceptor 등록 -->
+	<mvc:interceptors>
+		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+			<property name="paramName" value="lang"></property>
+		</bean>
+	</mvc:interceptors>
+	
+	
+	
+	
+<!-- 	<bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="mappings">
+			<props>
+				<prop key="/login.do">login</prop>
+				<prop key="/getBoardList.do">getBoardList</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="login" class="com.brerp.view.user.LoginController"></bean>
+	<bean id="getBoardList" class="com.brerp.view.board.GetBoardListController"></bean> -->
+
+</beans>

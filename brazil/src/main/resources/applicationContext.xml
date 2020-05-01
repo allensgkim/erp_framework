@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+
+<!-- 	<import resource="context-datasource.xml"/>
+	<import resource="context-transaction.xml"/>
+ -->
+ 	<context:component-scan base-package="com.brerp.biz"></context:component-scan>
+ 	<aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+
+ 	<!-- DataSource 설정 -->
+ 	<context:property-placeholder location="classpath:config/database.properties"/>
+ 	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+ 		<property name="driverClassName" value="${jdbc.driver}"></property>
+ 		<property name="url" value="${jdbc.url}"></property>
+ 		<property name="username" value="${jdbc.username}"></property>
+ 		<property name="password" value="${jdbc.password}"></property>
+ 	</bean>
+ 	
+	<!-- Spring과 Mybatis 연동 설정 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="configLocation" value="classpath:sql-map-config.xml"/>
+	</bean>
+	<bean class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg ref="sqlSessionFactory"></constructor-arg>
+	</bean>
+
+ 	
+ 	<!-- Spring JDBC 설정 -->
+  	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+ 		<property name="dataSource" ref="dataSource"></property>
+ 	</bean>
+ 	
+ 	<!-- Transacction 설정 -->
+ 	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+ 		<property name="dataSource" ref="dataSource"></property>
+ 	</bean>
+ 	<tx:advice id="txAdvice" transaction-manager="txManager">
+ 		<tx:attributes>
+ 			<tx:method name="get*" read-only="true"/>
+ 			<tx:method name="*"/>
+ 		</tx:attributes>
+ 	</tx:advice>
+ 	<!-- 향후 aop:config에 같이 넣고 사용 현재는 어드바이스를 어노테이션으로 설정함-->
+ 	<aop:config>
+ 		<aop:pointcut id="txPointcut" expression="execution(* com.brerp.biz..*(..))"/>
+ 		<aop:advisor pointcut-ref="txPointcut" advice-ref="txAdvice"/>
+ 	</aop:config>
+ 	
+ 	
+<!--  	<bean id="log" class="com.brerp.biz.common.LogAdvice"></bean>
+ 	<bean id="before" class="com.brerp.biz.common.BeforeAdvice"></bean>
+ 	<bean id="afterReturning" class="com.brerp.biz.common.AfterReturningAdvice"></bean>
+ 	<bean id="afterThrowing" class="com.brerp.biz.common.AfterThrowingAdvice"></bean>
+ 	<bean id="after" class="com.brerp.biz.common.AfterAdvice"></bean>
+ 	<bean id="around" class="com.brerp.biz.common.AroundAdvice"></bean> -->
+ 	
+<!--  	<aop:config>
+ 		<aop:pointcut id="allPointcut" expression="execution(* com.brerp.biz..*Impl.*(..))"/>
+ 		<aop:pointcut id="getPointcut" expression="execution(* com.brerp.biz..*Impl.get*(..))"/>
+ 		
+ 		<aop:aspect ref="log">
+ 			<aop:before pointcut-ref="allPointcut" method="printLog"/>
+ 		</aop:aspect>
+ 		
+ 		<aop:aspect ref="before">
+ 			<aop:before pointcut-ref="getPointcut" method="beforeLog"/>
+ 		</aop:aspect>
+  		<aop:aspect ref="afterReturning">
+ 			<aop:after-returning pointcut-ref="getPointcut" method="afterLog" returning="returnObj" />
+ 		</aop:aspect>
+   		<aop:aspect ref="afterThrowing">
+ 			<aop:after-throwing pointcut-ref="allPointcut" method="exceptionLog" throwing="exceptObj"/>
+ 		</aop:aspect>
+   		<aop:aspect ref="after">
+ 			<aop:after pointcut-ref="allPointcut" method="finallyLog"/>
+ 		</aop:aspect>
+   		<aop:aspect ref="around">
+ 			<aop:around pointcut-ref="allPointcut" method="aroundLog"/>
+ 		</aop:aspect>
+ 	</aop:config> -->
+ 	
+ 	
+ 	
+ 	
+<!--  	<bean id="userService" class="com.brerp.biz.user.impl.UserServiceImpl">
+ 		<property name="userDAO" ref="userDAO"></property>
+ 	</bean>
+ 	<bean id="userDAO" class="com.brerp.biz.user.impl.UserDAO"></bean> -->
+</beans>
